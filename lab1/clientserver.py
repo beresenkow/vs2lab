@@ -27,7 +27,7 @@ class Server:
         self.sock.bind((const_cs.HOST, const_cs.PORT))
         self.sock.settimeout(3)  # time out in order not to block forever
         self._logger.info("Server bound to socket " + str(self.sock))
-        self.contacts = {
+        self.tel_dictionary = {
             "Alice": "+49 151 23456789",
             "Bob": "+49 152 98765432",
             "Charlie": "+49 160 11122233",
@@ -69,20 +69,20 @@ class Server:
         """Handle different requests"""
         if re.match(Server.patternGETALL, request):
             self._logger.info("Recieved GETALL request")
-            contact_info = ', '.join([f'{name}: {number}' for name, number in self.contacts.items()])
+            contact_info = ', '.join([f'{name}: {number}' for name, number in self.tel_dictionary.items()])
             return f"GETALL: {contact_info}"
         elif re.match(Server.patternGET, request):
             self._logger.info("Recieved GET request")
             trimmed_data = request.strip()
             name = trimmed_data.split()[-1].strip()
 
-            if name in self.contacts:
-                return f"GET: {name}: {self.contacts[name]}"
+            if name in self.tel_dictionary:
+                return self.tel_dictionary[name]
             else:
-                return "Contact not found"
+                return f"Number not found for: {name}"
         else:
             self._logger.info("Unexpected request format")
-            return "Unexpected error occured"
+            return request + "*"  # return sent data plus an "*"
 
 class Client:
     """ The client """
@@ -95,18 +95,18 @@ class Client:
 
     def call(self, msg_in="Hello, world"):
         """ Call server """
-        # Send message
         self.sock.send(msg_in.encode('ascii'))  # send encoded string as data
-        data = self.sock.recv(4096)  # receive the response
+        data = self.sock.recv(1024)  # receive the response
         msg_out = data.decode('ascii')
         print(msg_out)  # print the result
         self.logger.info("Client request handled.")
         return msg_out
     
-    def get(self, msg_in=""):
-        return self.call(f"GET {msg_in}")
     
-    def getAll(self):
+    def get(self, name=""):
+        return self.call(f"GET {name}")
+    
+    def getall(self):
         return self.call("GETALL")
 
     def close(self):

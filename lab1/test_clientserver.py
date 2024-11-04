@@ -38,24 +38,36 @@ class TestEchoService(unittest.TestCase):
     def test_cl_get_false(self):
         """test get method"""
         tel_number = self.client.get("Alice")
-        self.assertEqual(tel_number, "+49 151 23456000")
+        self.assertNotEqual(tel_number, "+49 151 23456000")
 
     def test_cl_getall(self):
         """test getall method"""
-        tel_directory = self.client.getall()
-        self.assertIn("Alice", tel_directory)
-        self.assertIn("Bob", tel_directory)
-        self.assertEqual(tel_directory["Alice"], "+49 151 23456789")
-        self.assertEqual(tel_directory["Bob"], "+49 152 98765432")
+        tel_directory = self.client.getall()  # Returns a string of all contacts
+        self.assertIn("Alice: +49 151 23456789", tel_directory)
+        self.assertIn("Bob: +49 152 98765432", tel_directory)
+        self.assertIn("Charlie: +49 160 11122233", tel_directory)
+        self.assertIn("David: +49 171 44455566", tel_directory)
+        self.assertIn("Eva: +49 172 77788899", tel_directory)
+        self.assertIn("Frank: +49 173 33344455", tel_directory)
+        self.assertIn("Grace: +49 174 66677788", tel_directory)
+        self.assertIn("Hannah: +49 175 99900011", tel_directory)
+        self.assertIn("Ivan: +49 176 55566677", tel_directory)
+        self.assertIn("Julia: +49 177 88899900", tel_directory)
+
 
     def test_cl_getall_false(self):
         """test getall method"""
-        tel_directory = self.client.getall()
-        self.assertIn("Alice", tel_directory)
-        self.assertIn("Bob", tel_directory)
-        self.assertEqual(tel_directory["Alice"], "+49 151 23456000")
-        self.assertEqual(tel_directory["Bob"], "+49 152 98765111")
+        tel_directory = self.client.getall()  # Returns a string of all contacts
+        self.assertIn("Alice: +49 151 23456789", tel_directory)
+        self.assertIn("Bob: +49 152 98765432", tel_directory)
+        self.assertNotIn("Alice: +49 151 23456000", tel_directory)
+        self.assertNotIn("Bob: +49 152 98765111", tel_directory)
 
+
+    def test_cl_not_found(self):
+        """test name not found"""
+        tel_number = self.client.get("Vince")
+        self.assertEqual(tel_number, "Number not found for: Vince")
 
     def tearDown(self):
         self.client.close()  # terminate client after each test
