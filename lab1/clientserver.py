@@ -62,16 +62,22 @@ class Client:
         self.logger.info("Client down.")
         return msg_out
     
-    def get(name):
-        self.sock.send(msg_in.encode('ascii'))  # send encoded string as data
+    def get(self, name_msg_in):
+        self.sock.send(name_msg_in.encode('ascii'))  # send encoded string as data
         data = self.sock.recv(1024)  # receive the response
         tel_number = data.decode
+        print(tel_number)
+        self.sock.close()
+        self.logger.info("Telephone number send")
         return tel_number
 
-    def getall():
-        self.sock.send(msg_in.encode('ascii'))  # send encoded string as data
+    def getall(self):
+        #self.sock.send(msg_in.encode('ascii'))  # send encoded string as data
         data = self.sock.recv(1024)  # receive the response
         tel_dictionary = data.decode
+        print(tel_dictionary(["tel_number"]))
+        self.sock.close()
+        self.logger.info("Telephone number send")
         return tel_dictionary
 
 
