@@ -16,14 +16,18 @@ class Server:
     _logger = logging.getLogger("vs2lab.lab1.clientserver.Server")
     _serving = True
 
+class Server:
+    """ The server """
+    _logger = logging.getLogger("vs2lab.lab1.clientserver.Server")
+    _serving = True
+
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # prevents errors due to "addresses in use"
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((const_cs.HOST, const_cs.PORT))
-        self.sock.settimeout(3)  # set timeout to prevent indefinite blocking
+        self.sock.settimeout(3)
         self._logger.info("Server bound to socket " + str(self.sock))
 
-        # The dictionary containing telephone numbers
         self.tel_dictionary = {
             "Alice": "+49 151 23456789",
             "Bob": "+49 152 98765432",
@@ -40,23 +44,31 @@ class Server:
     def serve(self):
         """ Serve requests from the client """
         self.sock.listen(1)
-        while self._serving:  # continue serving as long as _serving is True
+        while self._serving:
             try:
-                (connection, address) = self.sock.accept()  # accepts new socket and client address
+                (connection, address) = self.sock.accept()
                 self._logger.info(f"Connection established with {address}")
                 while True:
-                    data = connection.recv(1024)  # receive data from client
+                    data = connection.recv(1024)
                     if not data:
-                        break  # stop if no data is received
-
+                        break
+                    
                     request = data.decode('ascii')
-                    response = self.tel_dictionary.get(request, "Name not found")  # get the number or "not found" message
-                    connection.send(response.encode('ascii'))  # send response
-                connection.close()  # close the connection
+                    
+                    if request == "getall":
+                        # Send the entire dictionary as a string
+                        response = str(self.tel_dictionary)
+                    else:
+                        # Respond with individual telephone number if available
+                        response = self.tel_dictionary.get(request, "Name not found")
+
+                    connection.send(response.encode('ascii'))
+                connection.close()
             except socket.timeout:
-                pass  # ignore timeouts
+                pass
         self.sock.close()
         self._logger.info("Server down.")
+
 
 
 class Client:
@@ -88,12 +100,12 @@ class Client:
 
 
     def getall(self):
-        self.sock.send("getall".encode('ascii'))  # send encoded string as data
-        data = self.sock.recv(1024)  # receive the response
-        tel_dictionary = data.decode
-        print(tel_dictionary(["tel_number"]))
-        self.sock.close()
-        self.logger.info("Telephone number send")
+        """ Request the entire telephone directory """
+        self.sock.send("getall".encode('ascii'))  # Send "getall" request to server
+        data = self.sock.recv(4096)  # Increased buffer size for larger response
+        tel_dictionary = eval(data.decode('ascii'))  # Decode and evaluate the string to dictionary
+        print("Telephone Directory:", tel_dictionary)
+        self.logger.info("Full telephone directory received")
         return tel_dictionary
 
 
