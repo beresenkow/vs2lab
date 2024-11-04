@@ -285,4 +285,4 @@ $RECYCLE.BIN/
 *.zip
 .vscode/
 
-Pipfile.log
+*.log
