@@ -89,7 +89,7 @@ class Client:
         data = self.sock.recv(1024)  # receive the response
         msg_out = data.decode('ascii')
         print(msg_out)  # print the result
-        self.logger.info("Response received: " + msg_out)
+        self.logger.info("CL: Response received: " + msg_out)
         return msg_out
 
     def get(self, name):
@@ -97,7 +97,7 @@ class Client:
         self.sock.send(name.encode('ascii'))  # send the name to the server
         data = self.sock.recv(1024)  # receive the response
         tel_number = data.decode('ascii')
-        print(f"Telephone number for {name}: {tel_number}")
+        print(f"CL: Telephone number for {name}: {tel_number}")
         self.logger.info(f"Telephone number for {name} received")
         return tel_number
 
@@ -107,7 +107,7 @@ class Client:
         self.sock.send("getall".encode('ascii'))  # Send "getall" request to server
         data = self.sock.recv(4096)  # Increased buffer size for larger response
         tel_dictionary = eval(data.decode('ascii'))  # Decode and evaluate the string to dictionary
-        print("Telephone Directory:", tel_dictionary)
+        print("CL: Telephone Directory:", tel_dictionary)
         self.logger.info("Full telephone directory received")
         return tel_dictionary
 
