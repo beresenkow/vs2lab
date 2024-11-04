@@ -58,9 +58,12 @@ class Server:
                     if request == "getall":
                         # Send the entire dictionary as a string
                         response = str(self.tel_dictionary)
+                    elif request in self.tel_dictionary:
+                        # Send the specific phone number if the name is found
+                        response = self.tel_dictionary[request]
                     else:
-                        # Respond with individual telephone number if available
-                        response = self.tel_dictionary.get(request, "Name not found")
+                        # General response for non-dictionary requests
+                        response = f"Received message: No number found for: {request}"
 
                     connection.send(response.encode('ascii'))
                 connection.close()
@@ -111,5 +114,5 @@ class Client:
 
     def close(self):
         """ Close socket """
-        self.sock.close() #test
+        self.sock.close()
 
