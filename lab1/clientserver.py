@@ -83,4 +83,5 @@ class Client:
 
     def close(self):
         """ Close socket """
-        self.sock.close()
+        self.sock.close() #test
+
