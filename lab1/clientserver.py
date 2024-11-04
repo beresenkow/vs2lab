@@ -4,10 +4,12 @@ Client and server using classes
 
 import logging
 import socket
+
 import const_cs
 from context import lab_logging
+import re
 
-lab_logging.setup(stream_level=logging.INFO)  # initialize logging channels for the lab
+lab_logging.setup(stream_level=logging.INFO)  # init loging channels for the lab
 
 # pylint: disable=logging-not-lazy, line-too-long
 
@@ -16,19 +18,16 @@ class Server:
     _logger = logging.getLogger("vs2lab.lab1.clientserver.Server")
     _serving = True
 
-class Server:
-    """ The server """
-    _logger = logging.getLogger("vs2lab.lab1.clientserver.Server")
-    _serving = True
+    patternGET = r'^GET\s.*$'  # Pattern to match GET ...
+    patternGETALL = r'^GETALL'  # Pattern to match GETALL
 
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # prevents errors due to "addresses in use"
         self.sock.bind((const_cs.HOST, const_cs.PORT))
-        self.sock.settimeout(3)
+        self.sock.settimeout(3)  # time out in order not to block forever
         self._logger.info("Server bound to socket " + str(self.sock))
-
-        self.tel_dictionary = {
+        self.contacts = {
             "Alice": "+49 151 23456789",
             "Bob": "+49 152 98765432",
             "Charlie": "+49 160 11122233",
@@ -40,39 +39,50 @@ class Server:
             "Ivan": "+49 176 55566677",
             "Julia": "+49 177 88899900"
         }
+        self._logger.info("Contacts dictionary initialized")
 
     def serve(self):
-        """ Serve requests from the client """
+        """ Serve echo """
         self.sock.listen(1)
-        while self._serving:
+        while self._serving:  # as long as _serving (checked after connections or socket timeouts)
             try:
-                (connection, address) = self.sock.accept()
-                self._logger.info(f"Connection established with {address}")
-                while True:
-                    data = connection.recv(1024)
+                # pylint: disable=unused-variable
+                (connection, address) = self.sock.accept()  # returns new socket and address of client
+                while True:  # forever
+                    data = connection.recv(1024)  # receive data from client
                     if not data:
-                        break
-                    
-                    request = data.decode('ascii')
-                    
-                    if request == "getall":
-                        # Send the entire dictionary as a string
-                        response = str(self.tel_dictionary)
-                    elif request in self.tel_dictionary:
-                        # Send the specific phone number if the name is found
-                        response = self.tel_dictionary[request]
-                    else:
-                        # General response for non-dictionary requests
-                        connection.send(data + "*".encode('ascii'))  # return sent data plus an "*"
+                        break  # stop if client stopped
 
-                    connection.send(response.encode('ascii'))
-                connection.close()
+                    # Handle the request
+                    response = self.handle_request(data.decode('ascii'))
+                    
+                    # Send response back to the client
+                    connection.send(response.encode('ascii'))  # return sent data plus an "*"
+
+                connection.close()  # close the connection
             except socket.timeout:
-                pass
+                pass  # ignore timeouts
         self.sock.close()
         self._logger.info("Server down.")
 
+    def handle_request(self, request):
+        """Handle different requests"""
+        if re.match(Server.patternGETALL, request):
+            self._logger.info("Recieved GETALL request")
+            contact_info = ', '.join([f'{name}: {number}' for name, number in self.contacts.items()])
+            return f"GETALL: {contact_info}"
+        elif re.match(Server.patternGET, request):
+            self._logger.info("Recieved GET request")
+            trimmed_data = request.strip()
+            name = trimmed_data.split()[-1].strip()
 
+            if name in self.contacts:
+                return f"GET: {name}: {self.contacts[name]}"
+            else:
+                return "Contact not found"
+        else:
+            self._logger.info("Unexpected request format")
+            return "Unexpected error occured"
 
 class Client:
     """ The client """
@@ -85,36 +95,21 @@ class Client:
 
     def call(self, msg_in="Hello, world"):
         """ Call server """
+        # Send message
         self.sock.send(msg_in.encode('ascii'))  # send encoded string as data
-        data = self.sock.recv(1024)  # receive the response
+        data = self.sock.recv(4096)  # receive the response
         msg_out = data.decode('ascii')
         print(msg_out)  # print the result
-        self.sock.close()  # close the connection
-        self.logger.info("Client down.")
+        self.logger.info("Client request handled.")
         return msg_out
-
-
-    def get(self, name):
-        """ Request the telephone number for a given name """
-        self.sock.send(name.encode('ascii'))  # send the name to the server
-        data = self.sock.recv(1024)  # receive the response
-        tel_number = data.decode('ascii')
-        print(f"CL: Telephone number for {name}: {tel_number}")
-        self.logger.info(f"Telephone number for {name} received")
-        return tel_number
-
-
-    def getall(self):
-        """ Request the entire telephone directory """
-        self.sock.send("getall".encode('ascii'))  # Send "getall" request to server
-        data = self.sock.recv(4096)  # Increased buffer size for larger response
-        tel_dictionary = eval(data.decode('ascii'))  # Decode and evaluate the string to dictionary
-        print("CL: Telephone Directory:", tel_dictionary)
-        self.logger.info("Full telephone directory received")
-        return tel_dictionary
-
+    
+    def get(self, msg_in=""):
+        return self.call(f"GET {msg_in}")
+    
+    def getAll(self):
+        return self.call("GETALL")
 
     def close(self):
         """ Close socket """
         self.sock.close()
-
+        self.logger.info("Client socket closed.")
