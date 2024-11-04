@@ -61,6 +61,19 @@ class Client:
         self.sock.close()  # close the connection
         self.logger.info("Client down.")
         return msg_out
+    
+    def get(name):
+        self.sock.send(msg_in.encode('ascii'))  # send encoded string as data
+        data = self.sock.recv(1024)  # receive the response
+        tel_number = data.decode
+        return tel_number
+
+    def getall():
+        self.sock.send(msg_in.encode('ascii'))  # send encoded string as data
+        data = self.sock.recv(1024)  # receive the response
+        tel_dictionary = data.decode
+        return tel_dictionary
+
 
     def close(self):
         """ Close socket """
