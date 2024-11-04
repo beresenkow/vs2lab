@@ -30,6 +30,33 @@ class TestEchoService(unittest.TestCase):
         msg = self.client.call("Hello VS2Lab")
         self.assertEqual(msg, 'Hello VS2Lab*')
 
+    def test_cl_get(self):
+        """test get method"""
+        tel_number = self.client.get("Alice")
+        self.assertEqual(tel_number, "+49 151 23456789")
+
+    def test_cl_get_false(self):
+        """test get method"""
+        tel_number = self.client.get("Alice")
+        self.assertEqual(tel_number, "+49 151 23456000")
+
+    def test_cl_getall(self):
+        """test getall method"""
+        tel_directory = self.client.getall()
+        self.assertIn("Alice", tel_directory)
+        self.assertIn("Bob", tel_directory)
+        self.assertEqual(tel_directory["Alice"], "+49 151 23456789")
+        self.assertEqual(tel_directory["Bob"], "+49 152 98765432")
+
+    def test_cl_getall_false(self):
+        """test getall method"""
+        tel_directory = self.client.getall()
+        self.assertIn("Alice", tel_directory)
+        self.assertIn("Bob", tel_directory)
+        self.assertEqual(tel_directory["Alice"], "+49 151 23456000")
+        self.assertEqual(tel_directory["Bob"], "+49 152 98765111")
+
+
     def tearDown(self):
         self.client.close()  # terminate client after each test
 
@@ -39,6 +66,7 @@ class TestEchoService(unittest.TestCase):
         cls._server_thread.join()  # wait for server thread to terminate
 
     
+
 
 
 if __name__ == '__main__':
