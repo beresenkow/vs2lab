@@ -24,6 +24,21 @@ class Server:
         self.sock.settimeout(3)  # time out in order not to block forever
         self._logger.info("Server bound to socket " + str(self.sock))
 
+    tel_dictionary = {
+
+        "Alice": "+49 151 23456789",
+        "Bob": "+49 152 98765432",
+        "Charlie": "+49 160 11122233",
+        "David": "+49 171 44455566",
+        "Eva": "+49 172 77788899",
+        "Frank": "+49 173 33344455",
+        "Grace" : "+49 174 66677788",
+        "Hannah": "+49 175 99900011",
+        "Ivan": "+49 176 55566677",
+        "Julia": "+49 177 88899900"
+            
+    }
+
     def serve(self):
         """ Serve echo """
         self.sock.listen(1)
@@ -33,6 +48,8 @@ class Server:
                 (connection, address) = self.sock.accept()  # returns new socket and address of client
                 while True:  # forever
                     data = connection.recv(1024)  # receive data from client
+                    if data == tel_dictionary["Alice"]:
+                        connection.send(data + "*".encode('ascii')) 
                     if not data:
                         break  # stop if client stopped
                     connection.send(data + "*".encode('ascii'))  # return sent data plus an "*"
@@ -41,21 +58,6 @@ class Server:
                 pass  # ignore timeouts
         self.sock.close()
         self._logger.info("Server down.")
-
-        tel_dictionary = {
-
-            "Alice": "+49 151 23456789",
-            "Bob": "+49 152 98765432",
-            "Charlie": "+49 160 11122233",
-            "David": "+49 171 44455566",
-            "Eva": "+49 172 77788899",
-            "Frank": "+49 173 33344455",
-            "Grace" : "+49 174 66677788",
-            "Hannah": "+49 175 99900011",
-            "Ivan": "+49 176 55566677",
-            "Julia": "+49 177 88899900"
-            
-        }
 
 
 class Client:
