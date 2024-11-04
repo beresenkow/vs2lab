@@ -88,7 +88,7 @@ class Client:
 
 
     def getall(self):
-        #self.sock.send(msg_in.encode('ascii'))  # send encoded string as data
+        self.sock.send("getall".encode('ascii'))  # send encoded string as data
         data = self.sock.recv(1024)  # receive the response
         tel_dictionary = data.decode
         print(tel_dictionary(["tel_number"]))
