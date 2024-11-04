@@ -63,7 +63,7 @@ class Server:
                         response = self.tel_dictionary[request]
                     else:
                         # General response for non-dictionary requests
-                        response = f"Received message: No number found for: {request}"
+                        connection.send(data + "*".encode('ascii'))  # return sent data plus an "*"
 
                     connection.send(response.encode('ascii'))
                 connection.close()
@@ -84,13 +84,15 @@ class Client:
         self.logger.info("Client connected to socket " + str(self.sock))
 
     def call(self, msg_in="Hello, world"):
-        """ Send a basic message to the server and receive the response """
+        """ Call server """
         self.sock.send(msg_in.encode('ascii'))  # send encoded string as data
         data = self.sock.recv(1024)  # receive the response
         msg_out = data.decode('ascii')
         print(msg_out)  # print the result
-        self.logger.info("CL: Response received: " + msg_out)
+        self.sock.close()  # close the connection
+        self.logger.info("Client down.")
         return msg_out
+
 
     def get(self, name):
         """ Request the telephone number for a given name """
