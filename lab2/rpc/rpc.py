@@ -1,8 +1,7 @@
+from context import lab_channel
 from time import sleep
 import constRPC
 import threading
-
-from context import lab_channel
 
 
 class DBList:
@@ -13,6 +12,7 @@ class DBList:
         self.value = self.value + [data]
         return self
 
+
 class WaitForResponse(threading.Thread):
     def __init__(self, chan, server, callback):
         threading.Thread.__init__(self)
@@ -21,12 +21,8 @@ class WaitForResponse(threading.Thread):
         self.callback = callback
 
     def run(self):
-        
         msgrcv = self.chan.receive_from(self.server)
-
-    
         print("Der Server hat dem Thread geantwortet:", msgrcv)
-
         self.callback(msgrcv[1])
 
 
@@ -48,11 +44,6 @@ class Client:
         msglst = (constRPC.APPEND, constRPC.CALLBACK, data, db_list)  # message payload
         self.chan.send_to(self.server, msglst)  # send msg to server
         msgrcv = self.chan.receive_from(self.server)  # wait for response
-
-        """while True:
-            msgrcv = self.chan.receive_from(self.server)
-            if msgrcv is not None:
-                break"""
 
         if not constRPC.ACK == msgrcv[1]:
             print("Kein ACK bekommen/erhalten.")
@@ -94,6 +85,3 @@ class Server:
                     self.chan.send_to({client}, result)         # return response
                 else:
                     pass  # unsupported request, simply ignore
-
-
-# RPC: Remote Prpocedure Call
