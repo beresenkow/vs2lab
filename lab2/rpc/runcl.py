@@ -13,8 +13,11 @@ cl = rpc.Client()
 cl.run()
 
 base_list = rpc.DBList({'foo'})
-result_list = cl.append('bar', base_list)
+cl.append('bar', base_list)
 
-print("Result: {}".format(result_list.value))
+
+for i in range(10) :
+    print("client am Clientieren")
+    sleep(1)
 
 cl.stop()
