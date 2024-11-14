@@ -12,7 +12,7 @@ class DBList:
         return self
 
 class WaitForResponse:
-    def wait():
+    def run():
         return
 
 
@@ -66,3 +66,6 @@ class Server:
                     self.chan.send_to({client}, result)  # return response
                 else:
                     pass  # unsupported request, simply ignore
+
+
+# RPC: Remote Prpocedure Call
