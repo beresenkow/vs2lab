@@ -13,7 +13,7 @@ class DBList:
         self.value = self.value + [data]
         return self
 
-class WaitForResponse:
+class WaitForResponse(threading.Thread):
     def __init__(self, chan, server, callback):
         threading.Thread.__init__(self)
         self.chan = chan
@@ -21,18 +21,13 @@ class WaitForResponse:
         self.callback = callback
 
     def run(self):
-        while True:
-            msgrcv = self.chan.receive_from(self.server)
-            if msgrcv is not None:
-                break
+        
+        msgrcv = self.chan.receive_from(self.server)
 
-        if not constRPC.CALLBACK == msgrcv[1][0]:
-            print("Kein CALLBACK bekommen/erhalten.")
-            return
-
+    
         print("Der Server hat dem Thread geantwortet:", msgrcv)
 
-        self.callback(msgrcv[1][1])
+        self.callback(msgrcv[1])
 
 
 class Client:
@@ -48,26 +43,27 @@ class Client:
     def stop(self):
         self.chan.leave('client')
 
-    def append(self, data, db_list):
+    def append(self, data, db_list, callback):
         assert isinstance(db_list, DBList)
         msglst = (constRPC.APPEND, constRPC.CALLBACK, data, db_list)  # message payload
         self.chan.send_to(self.server, msglst)  # send msg to server
         msgrcv = self.chan.receive_from(self.server)  # wait for response
 
-        while True:
+        """while True:
             msgrcv = self.chan.receive_from(self.server)
             if msgrcv is not None:
-                break
+                break"""
 
         if not constRPC.ACK == msgrcv[1]:
             print("Kein ACK bekommen/erhalten.")
+            return
 
-        waitThread = WaitForResponse(self.chan, self.server, self.callback)
+        waitThread = WaitForResponse(self.chan, self.server, callback)
         waitThread.start()
 
         print("Der Warte-Thread wird nun auf die Antwort des Servers warten!")
 
-        return msgrcv[1]  # pass it to caller
+        return 
 
 
 class Server:
@@ -93,7 +89,7 @@ class Server:
 
                     self.chan.send_to({client}, constRPC.ACK)   # send ACK
 
-                    result = self.append(msgrpc[1], msgrpc[2])  # do local call
+                    result = self.append(msgrpc[2], msgrpc[3])  # do local call
 
                     self.chan.send_to({client}, result)         # return response
                 else:

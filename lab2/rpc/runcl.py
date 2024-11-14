@@ -5,7 +5,7 @@ from context import lab_logging
 
 def callback(result_list):
     print("Result: {}".format(result_list.value))
-    cl.stop()
+    
 
 lab_logging.setup(stream_level=logging.INFO)
 
@@ -16,8 +16,8 @@ base_list = rpc.DBList({'foo'})
 cl.append('bar', base_list, callback)
 
 #doing funny stuff while waiting
-for i in range(10) :
+for i in range(5) :
     print("client am Clientieren")
-    sleep(1)
+    sleep(2)
 
 cl.stop()
