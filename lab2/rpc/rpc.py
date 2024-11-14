@@ -14,6 +14,15 @@ class DBList:
         return self
 
 class WaitForResponse:
+    def __init__(self, chan, server, callback):
+        threading.Thread.__init__(self)
+        self.chan = chan
+        self.server = server
+        self.callback = callback
+    
+    def start():
+        return
+
     def run():
         return
 
@@ -33,11 +42,20 @@ class Client:
 
     def append(self, data, db_list):
         assert isinstance(db_list, DBList)
-        msglst = (constRPC.APPEND, data, db_list)  # message payload
+        msglst = (constRPC.APPEND, constRPC.CALLBACK, data, db_list)  # message payload
         self.chan.send_to(self.server, msglst)  # send msg to server
         msgrcv = self.chan.receive_from(self.server)  # wait for response
 
-        # Aller Wahrscheinlichkeit nach muss der Größte Teil der Logik hier hinkommen
+        while True:
+            msgrcv = self.chan.receive_from(self.server)
+            if msgrcv is not None:
+                break
+
+        if not constRPC.ACK == msgrcv[1]:
+            print("Kein ACK bekommen/erhalten.")
+
+        waitThread = WaitForResponse(self.chan, self.server, callback)
+        waitThread.start()
 
         return msgrcv[1]  # pass it to caller
 
