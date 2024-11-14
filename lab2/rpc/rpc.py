@@ -27,10 +27,10 @@ class WaitForResponse:
                 break
 
         if not constRPC.CALLBACK == msgrcv[1][0]:
-            print("Did not receive CALLBACK.")
+            print("Kein CALLBACK bekommen/erhalten.")
             return
 
-        print("I'm the waiting thread and the server returned:", msgrcv)
+        print("Der Server hat dem Thread geantwortet:", msgrcv)
 
         self.callback(msgrcv[1][1])
 
