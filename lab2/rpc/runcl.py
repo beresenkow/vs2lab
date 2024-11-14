@@ -13,9 +13,9 @@ cl = rpc.Client()
 cl.run()
 
 base_list = rpc.DBList({'foo'})
-cl.append('bar', base_list)
+cl.append('bar', base_list, callback)
 
-
+#doing funny stuff while waiting
 for i in range(10) :
     print("client am Clientieren")
     sleep(1)
