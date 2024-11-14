@@ -13,4 +13,7 @@ result_list = cl.append('bar', base_list)
 
 print("Result: {}".format(result_list.value))
 
+while(running) :
+    print("Forschungsteam forscht") #waiting...
+
 cl.stop()
