@@ -1,4 +1,6 @@
+from time import sleep
 import constRPC
+import threading
 
 from context import lab_channel
 
@@ -49,6 +51,7 @@ class Server:
     @staticmethod
     def append(data, db_list):
         assert isinstance(db_list, DBList)  # - Make sure we have a list
+        sleep(10)
         return db_list.append(data)
 
     def run(self):
@@ -60,10 +63,11 @@ class Server:
                 msgrpc = msgreq[1]  # fetch call & parameters
                 if constRPC.APPEND == msgrpc[0]:  # check what is being requested
 
+                    self.chan.send_to({client}, constRPC.ACK)   # send ACK
+
                     result = self.append(msgrpc[1], msgrpc[2])  # do local call
 
-
-                    self.chan.send_to({client}, result)  # return response
+                    self.chan.send_to({client}, result)         # return response
                 else:
                     pass  # unsupported request, simply ignore
 
