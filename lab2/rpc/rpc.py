@@ -19,12 +19,20 @@ class WaitForResponse:
         self.chan = chan
         self.server = server
         self.callback = callback
-    
-    def start():
-        return
 
-    def run():
-        return
+    def run(self):
+        while True:
+            msgrcv = self.chan.receive_from(self.server)
+            if msgrcv is not None:
+                break
+
+        if not constRPC.CALLBACK == msgrcv[1][0]:
+            print("Did not receive CALLBACK.")
+            return
+
+        print("I'm the waiting thread and the server returned:", msgrcv)
+
+        self.callback(msgrcv[1][1])
 
 
 class Client:
@@ -54,8 +62,10 @@ class Client:
         if not constRPC.ACK == msgrcv[1]:
             print("Kein ACK bekommen/erhalten.")
 
-        waitThread = WaitForResponse(self.chan, self.server, callback)
+        waitThread = WaitForResponse(self.chan, self.server, self.callback)
         waitThread.start()
+
+        print("Der Warte-Thread wird nun auf die Antwort des Servers warten!")
 
         return msgrcv[1]  # pass it to caller
 
