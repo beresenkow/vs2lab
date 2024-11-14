@@ -37,7 +37,8 @@ class Server:
             "Grace": "+49 174 66677788",
             "Hannah": "+49 175 99900011",
             "Ivan": "+49 176 55566677",
-            "Julia": "+49 177 88899900"
+            "Julia": "+49 177 88899900",
+            "Ölaf": "+4753845678347509"
         }
         self._logger.info("Contacts dictionary initialized")
 
@@ -54,10 +55,10 @@ class Server:
                         break  # stop if client stopped
 
                     # Handle the request
-                    response = self.handle_request(data.decode('ascii'))
+                    response = self.handle_request(data.decode('utf-8'))
                     
                     # Send response back to the client
-                    connection.send(response.encode('ascii'))  # return sent data plus an "*"
+                    connection.send(response.encode('utf-8'))  # return sent data plus an "*"
 
                 connection.close()  # close the connection
             except socket.timeout:
@@ -70,7 +71,7 @@ class Server:
         if re.match(Server.patternGETALL, request):
             self._logger.info("Recieved GETALL request")
             contact_info = ', '.join([f'{name}: {number}' for name, number in self.tel_dictionary.items()])
-            return f"GETALL: {contact_info}"
+            return contact_info
         elif re.match(Server.patternGET, request):
             self._logger.info("Recieved GET request")
             trimmed_data = request.strip()
@@ -95,9 +96,9 @@ class Client:
 
     def call(self, msg_in="Hello, world"):
         """ Call server """
-        self.sock.send(msg_in.encode('ascii'))  # send encoded string as data
+        self.sock.send(msg_in.encode('utf-8'))  # send encoded string as data
         data = self.sock.recv(1024)  # receive the response
-        msg_out = data.decode('ascii')
+        msg_out = data.decode('utf-8')
         print(msg_out)  # print the result
         self.logger.info("Client request handled.")
         return msg_out
