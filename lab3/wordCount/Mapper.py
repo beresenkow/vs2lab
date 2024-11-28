@@ -1,7 +1,7 @@
 import zmq
 import threading
 
-import constPipe
+import constPipe as const
 
 class Mapper(threading.Thread):
     def __init__(self):
