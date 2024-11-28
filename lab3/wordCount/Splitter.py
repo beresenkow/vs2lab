@@ -7,7 +7,7 @@ import constPipe as const
 
 class Splitter(threading.Thread):
     def __init__(self):
-        threading.__init__(self)
+        threading.Thread.__init__(self)
 
     def initWordCount(self, text):
         self.text = text

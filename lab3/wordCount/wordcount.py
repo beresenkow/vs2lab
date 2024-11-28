@@ -13,8 +13,8 @@ mappers = {
 }
 
 reducers = {
-    rd.Reducer(const.PORT1),
-    rd.Reducer(const.PORT2)
+    rd.Reducer(const.PORT2),
+    rd.Reducer(const.PORT3)
 }
 
 with open("wordcount.txt") as txt:
