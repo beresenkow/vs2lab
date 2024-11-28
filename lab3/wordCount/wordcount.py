@@ -16,3 +16,9 @@ reducers = {
     rd.Reducer(const.PORT1),
     rd.Reducer(const.PORT2)
 }
+
+with open("wordcount.txt") as txt:
+    text = txt.read()
+
+splitter.initWordCount(text)
+
