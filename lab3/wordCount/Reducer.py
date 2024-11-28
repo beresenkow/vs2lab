@@ -20,4 +20,4 @@ class Reducer(threading.Thread):
             else:
                 self.words[word] = 1
 
-            print("Das Wort: " + word + " wurde empfangen und zwar ganze " + str(self.words[word]) + " mal.")
+            print("Das Wort: '" + word + "' wurde empfangen und zwar ganze " + str(self.words[word]) + " mal.")

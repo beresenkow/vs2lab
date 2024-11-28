@@ -14,10 +14,10 @@ class Mapper(threading.Thread):
         splitterSocket.connect(f"tcp://localhost:{const.PORT1}")
 
         reducer1Socket = context.socket(zmq.PUSH)
-        reducer1Socket.connect(f"tcp://*:{const.PORT2}")
+        reducer1Socket.connect(f"tcp://localhost:{const.PORT2}")
 
         reducer2Socket = context.socket(zmq.PUSH)
-        reducer2Socket.connect(f"tcp://*:{const.PORT3}")
+        reducer2Socket.connect(f"tcp://localhost:{const.PORT3}")
 
         while True:
             sentence = splitterSocket.recv().decode('UTF-8')
