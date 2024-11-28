@@ -22,3 +22,10 @@ with open("wordcount.txt") as txt:
 
 splitter.initWordCount(text)
 
+splitter.start()
+
+for mapper in mappers:
+    mapper.start()
+
+for reducer in reducers:
+    reducer.start()
