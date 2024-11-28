@@ -7,7 +7,7 @@ import constPipe as const
 
 class Splitter(threading.Thread):
     def __init__(self):
-        threading.__init__(self)
+        threading.Thread.__init__(self)
 
     def initWordCount(self, text):
         self.text = text
@@ -17,7 +17,7 @@ class Splitter(threading.Thread):
         context = zmq.Context()
 
         mapperSocket = context.socket(zmq.PUSH)
-        mapperSocket.bind("tcp://*" + const.PORT1)
+        mapperSocket.bind(f"tcp://*:{const.PORT1}")
         lines = str.splitlines(self.text)
 
         sleep(2)
