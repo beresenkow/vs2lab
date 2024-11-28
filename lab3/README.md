@@ -218,7 +218,7 @@ ausgeben.
 Neben dem dritten Beispiel liefert die Beschreibung in
 
 - [Parallel Pipeline: Divide and
-  Conquer](https://zguide.zeromq.org/docs/chapter1/#Divide-and-Conquer)
+  Conquer](https://zguide.zeromq.orgÖ/docs/chapter1/#Divide-and-Conquer)
 
 ein nützliches Beispiel, an dem Sie sich orientieren können.
 
