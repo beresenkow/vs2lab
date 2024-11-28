@@ -1,12 +1,13 @@
 import zmq
 import threading
+from collections import defaultdict
 
 import constPipe as const
 
 class Reducer(threading.Thread):
     def __init__(self, port):
         self.port = port
-        self.words = {}
+        self.words = defaultdict(int)
         threading.Thread.__init__(self)
 
     def run(self):
@@ -17,10 +18,7 @@ class Reducer(threading.Thread):
 
         while True:
             word = mapperSocket.recv().decode('UTF-8')
-            if word in self.words:
-                self.words[word] += 1
-            else:
-                self.words[word] = 1
+            self.words[word] += 1
 
-            print("Das Wort: '" + word + "' wurde empfangen und zwar ganze " + str(self.words[word]) + " mal.")
+            print(f"Das Wort: '{word}' wurde empfangen und zwar ganze {self.words[word]} mal.")
 
