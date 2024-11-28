@@ -24,3 +24,5 @@ class Splitter(threading.Thread):
 
         for line in lines:
             mapperSocket.send_string(f"{line}")
+
+            
