@@ -17,7 +17,7 @@ class Splitter(threading.Thread):
         context = zmq.Context()
 
         mapperSocket = context.socket(zmq.PUSH)
-        mapperSocket.bind("tcp://*" + const.PORT1)
+        mapperSocket.bind(f"tcp://*:{const.PORT1}")
         lines = str.splitlines(self.text)
 
         sleep(2)
