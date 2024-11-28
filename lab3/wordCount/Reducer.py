@@ -4,8 +4,10 @@ import threading
 import constPipe as const
 
 class Reducer(threading.Thread):
-    def __init__(self):
-        threading.__init__(self)
+    def __init__(self, port):
+        self.port = port
+        self.words = {}
+        threading.Thread.__init__(self)
 
     def run(self):
         context = zmq.Context()
@@ -21,3 +23,4 @@ class Reducer(threading.Thread):
                 self.words[word] = 1
 
             print("Das Wort: '" + word + "' wurde empfangen und zwar ganze " + str(self.words[word]) + " mal.")
+
