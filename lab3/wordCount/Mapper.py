@@ -11,13 +11,13 @@ class Mapper(threading.Thread):
         context = zmq.Context()
 
         splitterSocket = context.socket(zmq.PULL)
-        splitterSocket.bind(f"tcp://*:{const.PORT1}")
+        splitterSocket.connect(f"tcp://localhost:{const.PORT1}")
 
         reducer1Socket = context.socket(zmq.PUSH)
-        reducer1Socket.bind(f"tcp://*:{const.PORT2}")
+        reducer1Socket.connect(f"tcp://*:{const.PORT2}")
 
         reducer2Socket = context.socket(zmq.PUSH)
-        reducer2Socket.bind(f"tcp://*:{const.PORT3}")
+        reducer2Socket.connect(f"tcp://*:{const.PORT3}")
 
         while True:
             sentence = splitterSocket.recv().decode('UTF-8')

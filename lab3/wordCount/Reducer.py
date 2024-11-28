@@ -4,14 +4,16 @@ import threading
 import constPipe as const
 
 class Reducer(threading.Thread):
-    def __init__(self):
+    def __init__(self, port):
+        self.port = port
+        self.words = {}
         threading.Thread.__init__(self)
 
     def run(self):
         context = zmq.Context()
 
         mapperSocket = context.socket(zmq.PULL)
-        mapperSocket.bind(f"tcp://*:{self.port}")
+        mapperSocket.bind(f"tcp://localhost:{self.port}")
 
         while True:
             word = mapperSocket.recv().decode('UTF-8')#
