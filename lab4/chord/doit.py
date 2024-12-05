@@ -8,6 +8,7 @@ Chord Application
 """
 
 import logging
+import random
 import sys
 import multiprocessing as mp
 
@@ -15,25 +16,51 @@ import chordnode as chord_node
 import constChord
 from context import lab_channel, lab_logging
 
+
 lab_logging.setup(stream_level=logging.INFO)
 
 
 class DummyChordClient:
     """A dummy client template with the channel boilerplate"""
 
+    ###new
+
     def __init__(self, channel):
         self.channel = channel
         self.node_id = channel.join('client')
+        self.logger = logging.getLogger("vs2lab.lab4.dummyChord")
 
     def enter(self):
         self.channel.bind(self.node_id)
-
+        
+    
     def run(self):
-        ################ ändern !!!
-        print("Implement me pls...")
-        self.channel.send_to(  # a final multicast
-            {i.decode() for i in list(self.channel.channel.smembers('node'))},
-            constChord.STOP)
+                
+        # Get all nodes from the channel
+        nodes = {i.decode() for i in list(self.channel.channel.smembers('node'))}        
+        
+        random_node = random.choice(list(nodes))
+        random_key = random.randint(0, 2**self.channel.n_bits - 1)
+
+        self.logger.info(f"Client {self.node_id} is looking up key {random_key} starting at node {random_node}")
+        self.channel.send_to([random_node], (constChord.LOOKUP_REQ, random_key, self.node_id))
+
+        # Wait for the lookup response
+        while True:
+            message = self.channel.receive_from_any()
+            sender = message[0]
+            request = message[1]
+
+            if request[0] == constChord.LOOKUP_REP:
+                self.logger.info(f"Client {self.node_id} received lookup response {request[1]} from {sender}")
+                break
+
+        # Signal all nodes to stop
+        self.channel.send_to(nodes, constChord.STOP)
+
+
+        ###newend
+
 
 
 def create_and_run(num_bits, node_class, enter_bar, run_bar):
