@@ -29,6 +29,7 @@ class DummyChordClient:
         self.channel.bind(self.node_id)
 
     def run(self):
+        ################ ändern !!!
         print("Implement me pls...")
         self.channel.send_to(  # a final multicast
             {i.decode() for i in list(self.channel.channel.smembers('node'))},

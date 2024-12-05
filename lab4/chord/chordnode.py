@@ -146,6 +146,8 @@ class ChordNode:
                                   .format(self.node_id, int(sender)))
                 break
 
+            ########################### ändern !!!
+            
             if request[0] == constChord.LOOKUP_REQ:  # A lookup request
                 self.logger.info("Node {:04n} received LOOKUP {:04n} from {:04n}."
                                  .format(self.node_id, int(request[1]), int(sender)))
