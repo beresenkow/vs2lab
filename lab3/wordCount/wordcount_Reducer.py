@@ -1,5 +1,3 @@
-import Splitter as sp
-import Mapper as mp
 import Reducer as rd
 
 import constPipe as const
@@ -18,11 +16,3 @@ if __name__ == "__main__":
 
     reducer = rd.Reducer(port)
     reducer.start()
-
-#reducers = {
-#    rd.Reducer(const.PORT1),
-#    rd.Reducer(const.PORT2)
-#}
-
-#for reducer in reducers:
-#    reducer.start()

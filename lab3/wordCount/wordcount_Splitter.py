@@ -1,8 +1,4 @@
 import Splitter as sp
-import Mapper as mp
-import Reducer as rd
-
-import constPipe as const
 
 splitter = sp.Splitter()
 

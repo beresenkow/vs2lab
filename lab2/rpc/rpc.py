@@ -45,11 +45,6 @@ class Client:
         self.chan.send_to(self.server, msglst)  # send msg to server
         msgrcv = self.chan.receive_from(self.server)  # wait for response
 
-        """while True:
-            msgrcv = self.chan.receive_from(self.server)
-            if msgrcv is not None:
-                break"""
-
         if not constRPC.ACK == msgrcv[1]:
             print("Kein ACK bekommen/erhalten.")
             return
@@ -58,7 +53,6 @@ class Client:
         waitThread.start()
 
         print("Der Warte-Thread wird nun auf die Antwort des Servers warten!")
-
         return 
 
 
