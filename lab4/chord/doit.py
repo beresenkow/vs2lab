@@ -57,10 +57,8 @@ class DummyChordClient:
 
         # Signal all nodes to stop
         self.channel.send_to(nodes, constChord.STOP)
-
-
+        
         ###newend
-
 
 
 def create_and_run(num_bits, node_class, enter_bar, run_bar):
