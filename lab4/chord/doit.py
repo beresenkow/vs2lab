@@ -52,7 +52,7 @@ class DummyChordClient:
             request = message[1]
 
             if request[0] == constChord.LOOKUP_REP:
-                self.logger.info(f"Client {self.node_id} received lookup response {request[1]} from {sender}")
+                self.logger.info(f"Client {self.node_id} received lookup response {request[2]} from {sender}")
                 break
 
         # Signal all nodes to stop
