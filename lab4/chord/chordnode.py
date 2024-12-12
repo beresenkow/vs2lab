@@ -166,11 +166,6 @@ class ChordNode:
                     self.channel.send_to([request[2]], (constChord.LOOKUP_REP, next_id))
                 else:
                     self.channel.send_to([str(next_id)], (constChord.LOOKUP_REQ, key,current))
-            
-
-                # look up and return local successor 
-                #next_id: int = self.local_successor_node(request[1])
-                #self.channel.send_to([sender], (constChord.LOOKUP_REP, next_id))
 
                 ###newend
 
