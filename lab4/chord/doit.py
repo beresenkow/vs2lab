@@ -23,8 +23,6 @@ lab_logging.setup(stream_level=logging.INFO)
 class DummyChordClient:
     """A dummy client template with the channel boilerplate"""
 
-    ###new
-
     def __init__(self, channel):
         self.channel = channel
         self.node_id = channel.join('client')
@@ -34,6 +32,8 @@ class DummyChordClient:
         self.channel.bind(self.node_id)
         
     
+    ###new
+
     def run(self):
                 
         # Get all nodes from the channel
@@ -52,15 +52,13 @@ class DummyChordClient:
             request = message[1]
 
             if request[0] == constChord.LOOKUP_REP:
-                self.logger.info(f"Client {self.node_id} received lookup response {request[1]} from {sender}")
+                self.logger.info(f"Client {self.node_id} received lookup response {request[2]} from {sender}")
                 break
 
         # Signal all nodes to stop
         self.channel.send_to(nodes, constChord.STOP)
-
-
+        
         ###newend
-
 
 
 def create_and_run(num_bits, node_class, enter_bar, run_bar):
