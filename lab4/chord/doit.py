@@ -23,8 +23,6 @@ lab_logging.setup(stream_level=logging.INFO)
 class DummyChordClient:
     """A dummy client template with the channel boilerplate"""
 
-    ###new
-
     def __init__(self, channel):
         self.channel = channel
         self.node_id = channel.join('client')
@@ -34,6 +32,8 @@ class DummyChordClient:
         self.channel.bind(self.node_id)
         
     
+    ###new
+
     def run(self):
                 
         # Get all nodes from the channel
