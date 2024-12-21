@@ -147,10 +147,11 @@ class Process:
                 self.logger.warning("Detected failure of process: {}".format(self.__mapid(failed_process)))
                 self.__remove_failed_process(failed_process)
 
+                # Entfernt den ausgefallen Prozess aus der queue
                 if failed_process in self.other_processes:
                     self.other_processes.remove(failed_process)
 
-                # Entfernt den ausgefallen Prozess aus der queue
+                
                 self.queue = [item for item in self.queue if item[1] != failed_process]
                 # Loggt das der ausgefallene Prozess entfernt wurde.
                 self.logger.info("Removed failed process: {}".format(self.__mapid(failed_process)))
@@ -173,7 +174,7 @@ class Process:
                 self.logger.info("Removed failed process: {}".format(self.__mapid(failed_process)))
                 self.__cleanup_queue()  # Finally sort and cleanup the queue
                 self.timeout_count = 0 # Zähler zurücksetzen
-                
+
             self.timeout_count += 1
 
     def init(self):
