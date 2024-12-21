@@ -77,11 +77,14 @@ class Process:
         msg = (self.clock, self.process_id, ALLOW)
         self.channel.send_to([requester], msg)  # Permit other
     
+    # BEGIN NEW
     # Erhöcht die eigene clock und sendet Nachricht mit Prozess der entfernt werden soll
     def __remove_failed_process(self, failed_process):
         self.clock = self.clock + 1  # Increment clock value
         msg = (self.clock, failed_process, REMOVE) # Sende Nachricht mit der id des Ausgefallenen Prozess 
-        self.channel.send_to(self.other_processes, msg)  # Permit other
+        self.channel.send_to(self.other_processes, msg) # Permit other
+        self.logger.info("Broadcasting removal of failed process: {}".format(self.__mapid(failed_process)))
+    # END NEW
 
     def __release(self):
         # need to be first in queue to issue a release
@@ -146,7 +149,27 @@ class Process:
                                         'Clock '+str(msg[0]),
                                         self.__mapid(msg[1]),
                                         msg[2]), self.queue))))
-        
+            
+            
+            # BEGIN NEW
+            if self.timeout_count >= len(self.queue):
+                # Detect failure of the first process in the queue
+                failed_process = self.queue[0][1]
+                self.logger.warning("Detected failure of process: {}".format(self.__mapid(failed_process)))
+                self.__remove_failed_process(failed_process)
+
+                if failed_process in self.other_processes:
+                    self.other_processes.remove(failed_process)
+
+                self.queue = [item for item in self.queue if item[1] != failed_process]
+                self.logger.info("Removed failed process: {}".format(self.__mapid(failed_process)))
+                self.__cleanup_queue()
+                self.timeout_count = 0  # Reset timeout count
+            else:
+                self.timeout_count += 1
+
+            # END NEW
+            """
             if self.timeout_count < len(self.queue) and self.timeout_count == 0 and self.queue[0][2] == '1' and self.queue[0][1] == self.process_id:
                 working_processes = [entry[1] for entry in self.queue if entry[2] == '2']
                 working_processes.append(self.process_id)
@@ -188,6 +211,7 @@ class Process:
                 self.timeout_count = 0 # Zähler zurücksetzen
 
             self.timeout_count += 1
+            """
 
     def init(self, peer_name, peer_type):
         self.channel.bind(self.process_id)
