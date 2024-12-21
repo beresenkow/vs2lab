@@ -1,4 +1,8 @@
-ENTER   = '1'
-ALLOW   = '2'
-RELEASE = '3'
-REMOVE = '4'
+# Messages
+ENTER = 'ENTER'
+ALLOW = 'ALLOW'
+RELEASE = 'RELEASE'
+# Process behaviors
+ACTIVE = 'ACTIVE'
+PASSIVE = 'PASSIVE'
+BEHAVIOR_TYPES = [ACTIVE, PASSIVE]
