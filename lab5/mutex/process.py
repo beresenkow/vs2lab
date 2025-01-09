@@ -150,12 +150,7 @@ class Process:
 
             self.__cleanup_queue()  # Finally sort and cleanup the queue
         else:
-            self.logger.info("{} timed out on RECEIVE. Local queue: {}".
-                             format(self.__mapid(),
-                                    list(map(lambda msg: (
-                                        'Clock '+str(msg[0]),
-                                        self.__mapid(msg[1]),
-                                        msg[2]), self.queue))))
+            self.logger.info("{} timed out on RECEIVE. Local queue: {}". format(self.__mapid(), list(map(lambda msg: ('Clock '+str(msg[0]), self.__mapid(msg[1]), msg[2]), self.queue))))
             if len(self.queue) > 0:
                 self.__handle_timeout()
 
