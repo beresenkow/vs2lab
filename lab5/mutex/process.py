@@ -104,7 +104,7 @@ class Process:
             self.dead_processes = self.other_processes.copy()
             msg = (self.clock, self.process_id, CALL)
             self.channel.send_to(self.other_processes, msg)
-            self.logger.info(f"Detected failure of processes: {self.dead_processes}")
+            self.logger.info(f"Detected failure of process")
         
         elif self.timeout_counter == 1:
             self.logger.info(f"Failed processes will be removed: {self.dead_processes}")
