@@ -3,7 +3,7 @@ import random
 import time
 
 from context import lab_channel
-from constMutex import ENTER, RELEASE, ALLOW, ACTIVE, PING, PONG
+from constMutex import ENTER, RELEASE, ALLOW, ACTIVE, CALL, CALLBACK
 
 
 class Process:
@@ -102,7 +102,7 @@ class Process:
     def __handle_timeout(self):
         if self.timeout_counter == 0:
             self.dead_processes = self.other_processes.copy()
-            msg = (self.clock, self.process_id, PING)
+            msg = (self.clock, self.process_id, CALL)
             self.channel.send_to(self.other_processes, msg)
             self.logger.info(f"Detected failure of processes: {self.dead_processes}")
         
@@ -127,8 +127,8 @@ class Process:
                 self.__mapid(),
                 "ENTER" if msg[2] == ENTER
                 else "ALLOW" if msg[2] == ALLOW
-                else "PING" if msg[2] == PING
-                else "PONG" if msg[2] == PONG
+                else "CALL" if msg[2] == CALL
+                else "CALLBACK" if msg[2] == CALLBACK
                 else "RELEASE", self.__mapid(msg[1])))
 
             if msg[2] == ENTER:
@@ -137,10 +137,10 @@ class Process:
                 self.__allow_to_enter(msg[1])
             elif msg[2] == ALLOW:
                 self.queue.append(msg)  # Append an ALLOW
-            elif msg[2] == PING:
-                msg = (self.clock, self.process_id, PONG)
+            elif msg[2] == CALL:
+                msg = (self.clock, self.process_id, CALLBACK)
                 self.channel.send_to([_receive[0]], msg)
-            elif msg[2] == PONG:
+            elif msg[2] == CALLBACK:
                 if _receive[0] in self.dead_processes:
                     self.dead_processes.remove(_receive[0])
             elif msg[2] == RELEASE:
