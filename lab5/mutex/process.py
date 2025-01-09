@@ -73,6 +73,8 @@ class Process:
         self.channel.send_to(self.other_processes, request_msg)  # Send request
 
     def __allow_to_enter(self, requester):
+        if not self.queue:
+            return False
         self.clock = self.clock + 1  # Increment clock value
         msg = (self.clock, self.process_id, ALLOW)
         self.channel.send_to([requester], msg)  # Permit other
@@ -80,10 +82,10 @@ class Process:
     # BEGIN NEW
     # Erhöcht die eigene clock und sendet Nachricht mit Prozess der entfernt werden soll
     def __remove_failed_process(self, failed_process):
-        self.clock = self.clock + 1  # Increment clock value
-        msg = (self.clock, failed_process, REMOVE) # Sende Nachricht mit der id des Ausgefallenen Prozess 
-        self.channel.send_to(self.other_processes, msg) # Permit other
-        self.logger.info("Broadcasting removal of failed process: {}".format(self.__mapid(failed_process)))
+        self.clock += 1
+        msg = (self.clock, failed_process, REMOVE)
+        self.channel.send_to(self.other_processes, msg)
+        self.logger.info(f"Broadcasted removal of failed process: {self.__mapid(failed_process)}")
     # END NEW
 
     def __release(self):
@@ -99,6 +101,21 @@ class Process:
         self.channel.send_to(self.other_processes, msg)
 
     def __allowed_to_enter(self):
+        if not self.queue:
+            return False
+        first_in_queue = self.queue[0][1] == self.process_id
+
+        if not self.queue:
+            self.logger.warning(f"Queue is empty for process {self.process_id}. Cannot enter critical section.")
+            return False
+        """
+        try:
+            first_in_queue = self.queue[0][1] == self.process_id
+            return first_in_queue
+        except IndexError as e:
+            self.logger.error(f"Error accessing queue for process {self.process_id}: {e}")
+            return False
+        """
         # See who has sent a message (the set will hold at most one element per sender)
         processes_with_later_message = set([req[1] for req in self.queue[1:]])
         # Access granted if this process is first in queue and all others have answered (logically) later
@@ -106,129 +123,45 @@ class Process:
         all_have_answered = len(self.other_processes) == len(
             processes_with_later_message)
         return first_in_queue and all_have_answered
-
+    
     def __receive(self):
         _receive = self.channel.receive_from(self.other_processes, 3)
         if _receive:
             msg = _receive[1]
-
-            self.clock = max(self.clock, msg[0])  # Adjust clock value...
-            self.clock = self.clock + 1  # ...and increment
-
-            self.logger.debug("{} received {} from {}.".format(
-                self.__mapid(),
-                "ENTER" if msg[2] == ENTER
-                else "ALLOW" if msg[2] == ALLOW
-                else "REMOVE" if msg[2] == REMOVE
-                else "RELEASE", self.__mapid(msg[1])))
+            self.clock = max(self.clock, msg[0]) + 1
+            self.logger.debug(f"{self.__mapid()} received {msg[2]} from {self.__mapid(msg[1])}")
 
             if msg[2] == ENTER:
-                self.queue.append(msg)  # Append an ENTER request
+                self.queue.append(msg)
                 self.__allow_to_enter(msg[1])
             elif msg[2] == ALLOW:
-                self.queue.append(msg)  # Append an ALLOW
+                self.queue.append(msg)
             elif msg[2] == RELEASE:
-                assert self.queue[0][1] == msg[1] and self.queue[0][2] == ENTER, \
-                    'State error: inconsistent remote RELEASE'
-                del (self.queue[0])  # Just remove first message
-            # BEGIN NEW
+                if self.queue and self.queue[0][1] == msg[1]:
+                    self.queue.pop(0)
             elif msg[2] == REMOVE:
                 self.queue = [item for item in self.queue if item[1] != msg[1]]
                 if msg[1] in self.other_processes:
                     self.other_processes.remove(msg[1])
-                self.logger.info("Removed failed process: {}".format(self.__mapid(msg[1])))
-            # END NEW
-
+                self.logger.info(f"Removed failed process: {self.__mapid(msg[1])}")
             self.__cleanup_queue()
         else:
-            self.logger.info("{} timed out on RECEIVE. Local queue: {}".format(
-                self.__mapid(),
-                list(map(lambda msg: (
-                    'Clock ' + str(msg[0]),
-                    self.__mapid(msg[1]),
-                    msg[2]), self.queue))))
+            self.logger.warning(f"{self.__mapid()} timed out. Local queue: {self.queue}")
+            self.__handle_timeout()
 
-            # BEGIN NEW
-            if len(self.queue) > 0 and self.timeout_count < len(self.queue) and self.queue[0][2] == '1' and self.queue[0][1] == self.process_id:
-                working_processes = [entry[1] for entry in self.queue if entry[2] == '2']
-                working_processes.append(self.process_id)
-                failed_process = ""
-
-                for process in self.all_processes:
-                    if process not in self.working_processes:
-                        failed_process = str(process)
-
-                self.logger.warning("Detected failure of process: {}".format(self.__mapid(failed_process)))
-                self.__remove_failed_process(failed_process)
-
-                if failed_process in self.other_processes:
-                    self.other_processes.remove(failed_process)
-
-                self.queue = [item for item in self.queue if item[1] != failed_process]
-                self.logger.info("Removed failed process: {}".format(self.__mapid(failed_process)))
-                self.__cleanup_queue()
-                self.timeout_count = 0
-            elif len(self.queue) > 0 and self.timeout_count < len(self.queue):
-                failed_process = self.queue[0][1]
-                self.logger.warning("Detected failure of process: {}".format(self.__mapid(failed_process)))
-                self.__remove_failed_process(failed_process)
-                self.clock = self.clock + 1
-
-                if failed_process in self.other_processes:
-                    self.other_processes.remove(failed_process)
-
-                self.queue = [item for item in self.queue if item[1] != failed_process]
-                self.logger.info("Removed failed process: {}".format(self.__mapid(failed_process)))
-                self.__cleanup_queue()
-                self.timeout_count = 0
-
-            self.timeout_count += 1
-
-            # END NEW
-            """
-            if self.timeout_count < len(self.queue) and self.timeout_count == 0 and self.queue[0][2] == '1' and self.queue[0][1] == self.process_id:
-                working_processes = [entry[1] for entry in self.queue if entry[2] == '2']
-                working_processes.append(self.process_id)
-                failed_process = ""
-                
-                for process in self.all_processes:
-                    if process not in self.working_processes:
-                        failed_process = str(process)
-
-                self.logger.warning("Detected failure of process: {}".format(self.__mapid(failed_process)))
-                self.__remove_failed_process(failed_process)
-
-                # Entfernt den ausgefallen Prozess aus der queue
-                if failed_process in self.other_processes:
-                    self.other_processes.remove(failed_process)
-
-                
-                self.queue = [item for item in self.queue if item[1] != failed_process]
-                # Loggt das der ausgefallene Prozess entfernt wurde.
-                self.logger.info("Removed failed process: {}".format(self.__mapid(failed_process)))
-                self.__cleanup_queue()  # Finally sort and cleanup the queue
-                self.timeout_count = 0
-
-            if self.timeout_count < len(self.queue) and self.timeout_count > 0 and self.queue[self.timeout_count][1] == self.process_id:
-                failed_process = self.queue[0][1]
-                self.logger.warning("Detected failure of process: {}".format(self.__mapid(failed_process)))
-                self.__remove_failed_process(failed_process)
-                self.clock = self.clock + 1  # Increment clock value
-
-                # Entfernt den ausgefallen Prozess aus der Liste der anderen Prozesse
-                if failed_process in self.other_processes:
-                    self.other_processes.remove(failed_process)
-
-                # Entfernt den ausgefallen Prozess aus der queue
-                self.queue = [item for item in self.queue if item[1] != failed_process]
-                # Loggt das der ausgefallene Prozess entfernt wurde.
-                self.logger.info("Removed failed process: {}".format(self.__mapid(failed_process)))
-                self.__cleanup_queue()  # Finally sort and cleanup the queue
-                self.timeout_count = 0 # Zähler zurücksetzen
-
-            self.timeout_count += 1
-            """
-
+    def __handle_timeout(self):
+        if not self.queue:
+            return
+        failed_process = self.queue[0][1]
+        self.logger.warning(f"Detected failure of process: {self.__mapid(failed_process)}")
+        self.__remove_failed_process(failed_process)
+        if failed_process in self.other_processes:
+            self.other_processes.remove(failed_process)
+        self.queue = [item for item in self.queue if item[1] != failed_process]
+        self.__cleanup_queue()
+        self.logger.info(f"Removed failed process: {self.__mapid(failed_process)}")
+        self.__cleanup_queue()
+    
     def init(self, peer_name, peer_type):
         self.channel.bind(self.process_id)
 
