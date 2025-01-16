@@ -25,4 +25,3 @@ class CoordinatorState(Enum):
     PRECOMMIT = "PRECOMMIT"
     ABORT = "ABORT"
     COMMIT = "COMMIT"
-
